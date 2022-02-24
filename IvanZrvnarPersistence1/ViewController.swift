@@ -9,6 +9,8 @@ import UIKit
 
 // changing the
 class ViewController: UICollectionViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    // array of our custom class 
+    var people = [Person]()
     
     
 //MARK: -View did Load
@@ -53,6 +55,10 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         if let jpegData = image.jpegData(compressionQuality: 0.8) {
                 try? jpegData.write(to: imagePath)
             }
+        
+        let person = Person(name: "Uknown", image: imageName)
+        people.append(person)
+        collectionView.reloadData()
 
             dismiss(animated: true)
     }
