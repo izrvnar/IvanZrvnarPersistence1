@@ -9,7 +9,7 @@ import UIKit
 
 // changing the
 class ViewController: UICollectionViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    // array of our custom class 
+    // array of our custom class
     var people = [Person]()
     
     
@@ -25,7 +25,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
     
     // how many items to populate the grid
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return people.count
     }
     
     // recycling collection view cells
@@ -33,6 +33,19 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Person", for: indexPath) as? PersonCell else{
             fatalError("Unable to deque person cell")
         }
+        let person = people[indexPath.item]
+
+            cell.name.text = person.name
+
+        // appending the path
+            let path = getDocumentsDirectory().appendingPathComponent(person.image)
+            cell.imageView.image = UIImage(contentsOfFile: path.path)
+
+        // giving the cell view a border and colour
+            cell.imageView.layer.borderColor = UIColor(white: 0, alpha: 0.3).cgColor
+            cell.imageView.layer.borderWidth = 2
+            cell.imageView.layer.cornerRadius = 3
+            cell.layer.cornerRadius = 7
         return cell
     }
     
@@ -68,6 +81,24 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         return paths[0]
     }
     
+    // adding the fucntion in the alert style so the user can add their name 
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let person = people[indexPath.item]
+
+        let ac = UIAlertController(title: "Rename person", message: nil, preferredStyle: .alert)
+        ac.addTextField()
+
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
+            guard let newName = ac?.textFields?[0].text else { return }
+            person.name = newName
+
+            self?.collectionView.reloadData()
+        })
+
+        present(ac, animated: true)
+    }
     
     
 
