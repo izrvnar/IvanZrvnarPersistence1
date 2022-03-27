@@ -18,10 +18,27 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         super.viewDidLoad()
         // adding a button to request photo acsess
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addNewPerson))
+        
+        // loading the array when the disk on startup and display it
+        let defaults = UserDefaults.standard
+        if let savedPeople = defaults.object(forKey: "people") as? Data {
+            if let decodedPeople = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(savedPeople) as? [Person] {
+                people = decodedPeople
+            }
+        }
+       
 
     }//: View did load
 
     //MARK: -METHODS
+    
+    // save method that saves an array of persons of the required information 
+    func save() {
+        if let savedData = try? NSKeyedArchiver.archivedData(withRootObject: people, requiringSecureCoding: false) {
+            let defaults = UserDefaults.standard
+            defaults.set(savedData, forKey: "people")
+        }
+    }
     
     // how many items to populate the grid
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -71,6 +88,8 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         
         let person = Person(name: "Uknown", image: imageName)
         people.append(person)
+        // adding the save method to the image picker to save the image
+        save()
         collectionView.reloadData()
 
             dismiss(animated: true)
@@ -81,7 +100,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         return paths[0]
     }
     
-    // adding the fucntion in the alert style so the user can add their name 
+    // adding the fucntion in the alert style so the user can add their name
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let person = people[indexPath.item]
 
@@ -93,7 +112,7 @@ class ViewController: UICollectionViewController, UIImagePickerControllerDelegat
         ac.addAction(UIAlertAction(title: "OK", style: .default) { [weak self, weak ac] _ in
             guard let newName = ac?.textFields?[0].text else { return }
             person.name = newName
-
+            self?.save()
             self?.collectionView.reloadData()
         })
 
